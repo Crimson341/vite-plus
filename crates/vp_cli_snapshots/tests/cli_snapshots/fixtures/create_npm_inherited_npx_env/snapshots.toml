@@ -1,0 +1,11 @@
+[[case]]
+name = "create_npm_inherited_npx_env"
+vp = "global"
+skip-platforms = ["windows", { os = "linux", libc = "musl" }]
+# `npx --package=vite-plus vp create` exports these to `vp`.
+env = { npm_config_package = "vite-plus", npm_config_call = "vp create" }
+comment = "npx-inherited npm_config_package must not leak into the nested `npx create-vite` (#2970)."
+steps = [
+  { argv = ["vp", "create", "vite:application", "--no-interactive", "--directory", "my-app", "--no-agent", "--no-editor", "--no-hooks"], snapshot = false, continue-on-failure = true },
+  { argv = ["vpt", "stat-file", "my-app/package.json", "--assert", "file"], comment = "app was scaffolded" },
+]

@@ -4,7 +4,7 @@ import path from 'node:path';
 import type { WorkspaceInfo, WorkspaceInfoOptional } from '../types/index.ts';
 import { readJsonFile } from '../utils/json.ts';
 import { isBingoTemplate } from '../utils/workspace.ts';
-import { prependToPathToEnvs } from './command.ts';
+import { prependToPathToEnvs, stripInheritedNpxEnvs } from './command.ts';
 import { isRelativePath } from './org-manifest.ts';
 import { BuiltinTemplate, type TemplateInfo, TemplateType } from './templates/types.ts';
 
@@ -103,9 +103,10 @@ export function discoverTemplate(
   // `bin` is an error rather than an npm fall-through).
   localTemplate?: boolean,
 ): TemplateInfo {
-  const envs = prependToPathToEnvs(workspaceInfo.downloadPackageManager.binPrefix, {
-    ...process.env,
-  });
+  const envs = prependToPathToEnvs(
+    workspaceInfo.downloadPackageManager.binPrefix,
+    stripInheritedNpxEnvs({ ...process.env }),
+  );
   const parentDir = inferParentDir(templateName, workspaceInfo, localTemplate);
   if (bundledLocalPath) {
     return {

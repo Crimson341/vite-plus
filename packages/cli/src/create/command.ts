@@ -121,6 +121,19 @@ export function formatDlxCommand(
   };
 }
 
+// `npx --package=vite-plus vp create` exports these to `vp`; a nested `npx` that
+// inherits them runs vite-plus again instead of the template package (#2970).
+const INHERITED_NPX_ENVS = new Set(['npm_config_package', 'npm_config_call']);
+
+export function stripInheritedNpxEnvs(envs: NodeJS.ProcessEnv) {
+  for (const key of Object.keys(envs)) {
+    if (INHERITED_NPX_ENVS.has(key.toLowerCase())) {
+      delete envs[key];
+    }
+  }
+  return envs;
+}
+
 export function prependToPathToEnvs(extraPath: string, envs: NodeJS.ProcessEnv) {
   const delimiter = path.delimiter;
   const pathKey = Object.keys(envs).find((key) => key.toLowerCase() === 'path') ?? 'PATH';

@@ -2,7 +2,7 @@ import fs from 'node:fs';
 import os from 'node:os';
 import path from 'node:path';
 
-import { afterEach, describe, expect, it } from 'vitest';
+import { afterEach, describe, expect, it, vi } from 'vitest';
 
 import type { WorkspaceInfo, WorkspaceInfoOptional } from '../../types/index.js';
 import {
@@ -22,6 +22,7 @@ describe('discoverTemplate', () => {
   let rootDir: string;
 
   afterEach(() => {
+    vi.unstubAllEnvs();
     if (rootDir) {
       fs.rmSync(rootDir, { recursive: true, force: true });
     }
@@ -106,6 +107,20 @@ describe('discoverTemplate', () => {
     // it expands to the `create-my-template` npm package instead.
     const templateInfo = discoverTemplate('my-template', [], workspaceInfo);
     expect(templateInfo.command).toBe('create-my-template');
+  });
+
+  it('drops npx --package envs so a nested npx resolves the template package', () => {
+    const workspaceInfo = createWorkspaceWithPackage({ name: 'my-template' });
+    // Set by `npx --package=vite-plus vp create`.
+    vi.stubEnv('npm_config_package', 'vite-plus');
+    vi.stubEnv('npm_config_call', 'vp create');
+    vi.stubEnv('npm_config_registry', 'http://localhost:4873/');
+
+    const { envs } = discoverTemplate('my-template', [], workspaceInfo);
+    expect(envs).not.toHaveProperty('npm_config_package');
+    expect(envs).not.toHaveProperty('npm_config_call');
+    expect(envs.npm_config_registry).toBe('http://localhost:4873/');
+    expect(process.env.npm_config_package).toBe('vite-plus');
   });
 
   it('rejects a declared by-name template that matches no workspace package', () => {

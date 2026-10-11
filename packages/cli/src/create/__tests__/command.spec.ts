@@ -12,7 +12,7 @@ vi.mock('../../../binding/index.js', () => ({
   runCommand: mockRunCommand,
 }));
 
-const { runCommandAndDetectProjectDir } = await import('../command.js');
+const { runCommandAndDetectProjectDir, stripInheritedNpxEnvs } = await import('../command.js');
 
 const tempDirs: string[] = [];
 
@@ -95,6 +95,22 @@ describe('runCommandAndDetectProjectDir', () => {
       args: ['create.js'],
       envs: {},
       cwd: path.join(cwd, 'apps'),
+    });
+  });
+});
+
+describe('stripInheritedNpxEnvs', () => {
+  it('removes npx --package envs in any case and keeps other npm config', () => {
+    const envs: NodeJS.ProcessEnv = {
+      npm_config_package: 'vite-plus',
+      NPM_CONFIG_CALL: 'vp create',
+      npm_config_registry: 'http://localhost:4873/',
+      PATH: '/usr/bin',
+    };
+    expect(stripInheritedNpxEnvs(envs)).toBe(envs);
+    expect(envs).toEqual({
+      npm_config_registry: 'http://localhost:4873/',
+      PATH: '/usr/bin',
     });
   });
 });

@@ -61,7 +61,7 @@ import {
   updatePackageJsonWithDeps,
   updateWorkspaceConfig,
 } from '../utils/workspace.ts';
-import type { ExecutionWithProjectDir } from './command.ts';
+import { type ExecutionWithProjectDir, stripInheritedNpxEnvs } from './command.ts';
 import { discoverTemplate, inferGitHubRepoName, inferParentDir, isGitHubUrl } from './discovery.ts';
 import { getInitialTemplateOptions } from './initial-template-options.ts';
 import { CreateConfigSchemaError, type CreateTemplateEntry } from './org-manifest.ts';
@@ -304,6 +304,8 @@ function showCreateSummary(options: {
 }
 
 async function main() {
+  // Unset for every child process, including the Rust-spawned ones that read the real env.
+  stripInheritedNpxEnvs(process.env);
   const { templateName, options, templateArgs } = parseArgs();
   let compactOutput = !options.verbose;
 
