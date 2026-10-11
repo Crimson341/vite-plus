@@ -1,0 +1,22 @@
+[[case]]
+name = "vp_no_header"
+vp = "global"
+skip-platforms = ["windows"]
+comment = "`VP_NO_HEADER` hides the banner in an interactive terminal (#2242)."
+steps = [
+  { argv = ["vp", "fmt", "src/"], comment = "banner by default" },
+  { argv = ["vp", "fmt", "src/"], envs = [["VP_NO_HEADER", "1"]], comment = "no banner" },
+  { argv = ["vp", "lint", "src/"], envs = [["VP_NO_HEADER", "1"]], comment = "no banner" },
+  { argv = ["vp", "help"], envs = [["VP_NO_HEADER", "1"]], comment = "no banner in help" },
+]
+
+# The local CLI prints the banner from JS and from the NAPI help renderer.
+[[case]]
+name = "vp_no_header_local"
+vp = "local"
+skip-platforms = ["windows"]
+steps = [
+  { argv = ["vp", "hooks", "-h"], comment = "banner by default" },
+  { argv = ["vp", "hooks", "-h"], envs = [["VP_NO_HEADER", "1"]], comment = "no banner" },
+  { argv = ["vp", "help", "dev"], envs = [["VP_NO_HEADER", "1"]], comment = "no banner" },
+]

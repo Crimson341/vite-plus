@@ -148,7 +148,11 @@ fn run_picker(command_order: &[usize]) -> io::Result<Option<PickedCommand>> {
     let mut query = String::new();
 
     let is_warp = vp_shared::header::is_warp_terminal();
-    let header_overhead = if is_warp { 10 } else { 9 };
+    let mut header_overhead = if is_warp { 10 } else { 9 };
+    // The banner and its blank line.
+    if vp_shared::header::is_header_disabled() {
+        header_overhead -= 2;
+    }
 
     terminal::enable_raw_mode()?;
     execute!(stdout, terminal::EnterAlternateScreen, cursor::Hide)?;
@@ -300,11 +304,16 @@ fn render_picker(
     if vp_shared::header::is_warp_terminal() {
         execute!(stdout, Print(NEWLINE))?;
     }
+    if !vp_shared::header::is_header_disabled() {
+        execute!(
+            stdout,
+            Print(format!("{pad}{}", vp_shared::header::vite_plus_header())),
+            Print(NEWLINE),
+            Print(NEWLINE)
+        )?;
+    }
     execute!(
         stdout,
-        Print(format!("{pad}{}", vp_shared::header::vite_plus_header())),
-        Print(NEWLINE),
-        Print(NEWLINE),
         Print(format!("{pad}{instruction}")),
         Print(NEWLINE),
         Print(NEWLINE)

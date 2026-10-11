@@ -262,6 +262,16 @@ These variables configure the installed Vite+ CLI. `VP_HOME` (above) also applie
   VP_SHELL=bash vp env print
   ```
 
+#### `VP_NO_HEADER`
+
+- **Purpose**: Hide the `VITE+` banner printed before commands
+- **Values**: Setting this variable, including to an empty string, hides the banner
+- **Default**: Unset (the banner is shown in interactive terminals)
+- **Example**:
+  ```bash
+  export VP_NO_HEADER=1
+  ```
+
 #### `VP_BYPASS`
 
 - **Purpose**: Bypass the Vite+ shim and use the system tool

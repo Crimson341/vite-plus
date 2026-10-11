@@ -545,8 +545,12 @@ pub fn vite_plus_header() -> String {
 ///   terminal for stdout, so the TTY check alone doesn't catch them; git
 ///   sets `GIT_INDEX_FILE` for pre-commit / commit-msg / prepare-commit-msg,
 ///   which is where `vp check --fix` typically runs.
+/// - the user opted out with `VP_NO_HEADER`.
 #[must_use]
 pub fn should_print_header() -> bool {
+    if is_header_disabled() {
+        return false;
+    }
     if !crate::is_stdout_terminal() {
         return false;
     }
@@ -554,6 +558,12 @@ pub fn should_print_header() -> bool {
         return false;
     }
     true
+}
+
+/// Whether the user turned the banner off with `VP_NO_HEADER`.
+#[must_use]
+pub fn is_header_disabled() -> bool {
+    std::env::var_os(crate::env_vars::VP_NO_HEADER).is_some()
 }
 
 /// Emit the Vite+ banner (header line + trailing blank line) to stdout, but
@@ -573,9 +583,10 @@ mod tests {
     use std::io::{BufReader, Cursor};
 
     use super::{
-        Rgb, gradient_eased, parse_osc4_rgb, parse_osc10_rgb, parse_rgb_triplet,
-        query_terminal_colors, read_until_either, to_8bit,
+        Rgb, gradient_eased, is_header_disabled, parse_osc4_rgb, parse_osc10_rgb,
+        parse_rgb_triplet, query_terminal_colors, read_until_either, should_print_header, to_8bit,
     };
+    use crate::env_vars::VP_NO_HEADER;
 
     #[test]
     fn to_8bit_matches_js_rules() {
@@ -779,5 +790,16 @@ mod tests {
         let n = read_until_either(&mut reader, 0x07, 0x1b, &mut buf).unwrap();
         assert_eq!(n, 9); // "abcdefgh" + BEL
         assert_eq!(&buf, b"abcdefgh\x07");
+    }
+
+    #[test]
+    fn vp_no_header_disables_header() {
+        temp_env::with_var(VP_NO_HEADER, Some("1"), || {
+            assert!(is_header_disabled());
+            assert!(!should_print_header());
+        });
+        temp_env::with_var(VP_NO_HEADER, None::<&str>, || {
+            assert!(!is_header_disabled());
+        });
     }
 }

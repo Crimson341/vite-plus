@@ -4,7 +4,7 @@ import { styleText } from 'node:util';
 
 import * as prompts from '@voidzero-dev/vite-plus-prompts';
 
-import { parseCreateArgs, vitePlusHeader } from '../../binding/index.js';
+import { parseCreateArgs, shouldPrintVitePlusHeader, vitePlusHeader } from '../../binding/index.js';
 import {
   addFrameworkShim,
   createCatalogDependencyResolver,
@@ -315,7 +315,7 @@ async function main() {
   // #endregion
 
   // #region Prepare Stage
-  if (options.interactive) {
+  if (options.interactive && shouldPrintVitePlusHeader()) {
     prompts.intro(vitePlusHeader());
   }
 

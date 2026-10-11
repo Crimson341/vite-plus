@@ -110,6 +110,9 @@ pub const VP_ENV_USE_EVAL_ENABLE: &str = "VP_ENV_USE_EVAL_ENABLE";
 /// Explicitly specify the current shell.
 pub const VP_SHELL: &str = "VP_SHELL";
 
+/// Suppress the Vite+ header banner when set.
+pub const VP_NO_HEADER: &str = "VP_NO_HEADER";
+
 /// Filter for update task types.
 pub const VP_UPDATE_TASK_TYPES: &str = "VP_UPDATE_TASK_TYPES";
 
